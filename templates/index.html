@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGNI Command Center</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .video-feed {
+            width: 100%;
+            border-radius: 15px;
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
+        }
+        .log-terminal {
+            height: 480px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #00ff88;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .log-entry { margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
+        .log-time { color: #888; margin-right: 10px; }
+        .log-threat { color: #ff3366; font-weight: bold; }
+        h2 { font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 1.5rem;}
+        .status-dot { height: 12px; width: 12px; background-color: #00ff88; border-radius: 50%; display: inline-block; margin-right: 10px; box-shadow: 0 0 10px #00ff88;}
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row mb-3">
+            <div class="col-12 text-center glass-panel py-3">
+                <h2><span class="status-dot"></span>AGNI AUTONOMOUS CROP PROTECTION</h2>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Left Column: Camera Feed -->
+            <div class="col-lg-8">
+                <div class="glass-panel">
+                    <h5 class="mb-3">Live Optical Targeting Feed</h5>
+                    <img src="/video_feed" class="video-feed" alt="AGNI Camera Feed">
+                </div>
+            </div>
+
+            <!-- Right Column: Live Logs -->
+            <div class="col-lg-4">
+                <div class="glass-panel">
+                    <h5 class="mb-3">System Logs & Coordinates</h5>
+                    <div class="log-terminal" id="log-box">
+                        <!-- Logs inject here via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch logs from the backend every second and auto-scroll to bottom
+        setInterval(() => {
+            fetch('/get_logs')
+                .then(response => response.json())
+                .then(data => {
+                    const logBox = document.getElementById('log-box');
+                    logBox.innerHTML = data.logs.map(log => {
+                        let style = log.includes("NEUTRALIZING") || log.includes("THREAT") ? "log-threat" : "";
+                        return `<div class="log-entry"><span class="log-time">[SYS]</span><span class="${style}">${log}</span></div>`;
+                    }).join('');
+                    logBox.scrollTop = logBox.scrollHeight; // Auto-scroll
+                });
+        }, 1000);
+    </script>
+</body>
+</html>
